@@ -74,6 +74,9 @@ class Twopoppy():
     sigma_d = None
     "dust surface density [g/cm^2]"
 
+    allowDriftingParticles = True
+    "if false, initially drifting particles will be removed (see DustPy)"
+
     rho_s = 1.6
     "dust material density [g/cm^3]"
 
@@ -550,8 +553,15 @@ class Twopoppy():
             # calculate the growth time scale and thus a_1(t)
 
             tau_grow = self.sigma_g / np.maximum(1e-100, self.e_stick * self.sigma_d * self.omega)
-
-            a_1 = np.minimum(a_max, self.a_1 * np.exp(np.minimum(500.0, dt / tau_grow)))
+ 
+            if isinstance(self.a_1, float) and not self.allowDriftingParticles:
+                P = self.rho_mid * self.cs**2
+                gamma = np.abs(self._grid.dlnxdlnrc(P))
+                ad = 5.e-3 * 2./np.pi * self.sigma_d / self.rho_s * (self.omega * self.r)**2. / self.cs**2. / gamma
+                a_1 = np.clip(ad, self.a_0, self.a_1)
+                self.sigma_d[ad < self.a_0] = self._dust_floor
+            else:
+                a_1 = np.minimum(a_max, self.a_1 * np.exp(np.minimum(500.0, dt / tau_grow)))
 
         # calculate the Stokes number of the particles
 
