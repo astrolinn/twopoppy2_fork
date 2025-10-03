@@ -554,7 +554,7 @@ class Twopoppy():
                 self.omega * self.r / (gamma * self.cs**2 * (1 - N))
 
             a_f = np.minimum(a_fr, a_df)
-            a_max = np.maximum(1.5*self.a_0, np.minimum(a_dr, a_f))
+            a_max = np.maximum(self.a_0, np.minimum(a_dr, a_f))
 
             # calculate the growth time scale and thus a_1(t)
 
@@ -564,8 +564,8 @@ class Twopoppy():
                 P = self.rho_mid * self.cs**2
                 gamma = np.abs(self._grid.dlnxdlnrc(P))
                 ad = 5.e-3 * 2./np.pi * self.sigma_d / self.rho_s * (self.omega * self.r)**2. / self.cs**2. / gamma
-                a_1 = np.clip(ad, 1.5*self.amin, self.a_1)
-                self.sigma_d[ad < 1.5*self.amin] = self._dust_floor
+                a_1 = np.clip(ad, self.amin, self.a_1)
+                self.sigma_d[ad < self.amin] = self._dust_floor
             else:
                 a_1 = np.minimum(a_max, self.a_1 * np.exp(np.minimum(500.0, dt / tau_grow)))
 
